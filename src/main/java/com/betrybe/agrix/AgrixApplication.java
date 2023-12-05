@@ -13,5 +13,4 @@ public class AgrixApplication {
     SpringApplication.run(AgrixApplication.class, args);
   }
 
-
 }
