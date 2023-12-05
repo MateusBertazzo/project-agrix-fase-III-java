@@ -3,11 +3,9 @@ package com.betrybe.agrix.ebytr.staff.service;
 import com.betrybe.agrix.ebytr.staff.exception.PersonNotFoundException;
 import com.betrybe.agrix.ebytr.staff.model.entity.Person;
 import com.betrybe.agrix.ebytr.staff.model.repository.PersonRepository;
-
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -71,19 +69,8 @@ public class PersonService implements UserDetailsService {
     return personRepository.save(person);    
   }
 
-  /**
-   * Login User.
-   */
-  public UserDetails loadUserByUsername(String username) {
-    Optional<Person> personOp = personRepository.findByUsername(username);
-
-    Person person = personOp.orElseThrow(() -> new PersonNotFoundException());
-
-    List<GrantedAuthority> authorities = person.getAuthorities().stream()
-        .map(role -> new SimpleGrantedAuthority(role.getAuthority()))
-        .collect(Collectors.toList());
-    
-    return new org.springframework.security.core.userdetails.User(
-        person.getUsername(), person.getPassword(), authorities);
+  public UserDetails loadUserByUsername(String username) throws PersonNotFoundException {
+    return personRepository.findByUsername(username)
+        .orElse(null);
   }
 }

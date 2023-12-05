@@ -1,5 +1,6 @@
 package com.betrybe.agrix.advice;
 
+import com.betrybe.agrix.ebytr.staff.exception.InvalidCredentialException;
 import com.betrybe.agrix.ebytr.staff.exception.PersonNotFoundException;
 import com.betrybe.agrix.exceptions.CropNotFoundException;
 import com.betrybe.agrix.exceptions.FarmNotFoundException;
@@ -32,6 +33,11 @@ public class ControllerExceptionAdvice {
 
   @ExceptionHandler(PersonNotFoundException.class)
     public ResponseEntity<String> personNotFoundHandler(PersonNotFoundException ex) {
-    return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
+    return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ex.getMessage());
+  }
+
+  @ExceptionHandler(InvalidCredentialException.class)
+    public ResponseEntity<String> invalidCredentialHandler(InvalidCredentialException ex) {
+    return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ex.getMessage());
   }
 }
