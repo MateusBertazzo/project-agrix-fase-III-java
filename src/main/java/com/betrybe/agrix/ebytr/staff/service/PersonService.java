@@ -3,8 +3,14 @@ package com.betrybe.agrix.ebytr.staff.service;
 import com.betrybe.agrix.ebytr.staff.exception.PersonNotFoundException;
 import com.betrybe.agrix.ebytr.staff.model.entity.Person;
 import com.betrybe.agrix.ebytr.staff.model.repository.PersonRepository;
+
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -14,7 +20,7 @@ import org.springframework.stereotype.Service;
  * Service layer class for handling persons business logic.
  */
 @Service
-public class PersonService {
+public class PersonService implements UserDetailsService {
 
   private final PersonRepository personRepository;
 
@@ -66,15 +72,18 @@ public class PersonService {
   }
 
   /**
-   * LoadByUsername.
+   * Login User.
    */
   public UserDetails loadUserByUsername(String username) {
-    Optional<Person> person = personRepository.findByUsername(username);
+    Optional<Person> personOp = personRepository.findByUsername(username);
 
-    if (person.isEmpty()) {
-      throw new PersonNotFoundException();
-    }
+    Person person = personOp.orElseThrow(() -> new PersonNotFoundException());
 
-    return person.get();
-  }  
+    List<GrantedAuthority> authorities = person.getAuthorities().stream()
+        .map(role -> new SimpleGrantedAuthority(role.getAuthority()))
+        .collect(Collectors.toList());
+    
+    return new org.springframework.security.core.userdetails.User(
+        person.getUsername(), person.getPassword(), authorities);
+  }
 }

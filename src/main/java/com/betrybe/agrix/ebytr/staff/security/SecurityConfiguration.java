@@ -29,7 +29,7 @@ public class SecurityConfiguration {
     this.securityFilter = securityFilter;
   }
 
-
+  // Código tirado do Course da ultima aula do Rodrigo
   /**
  * SecurityFilterChain.
  */  
@@ -42,7 +42,7 @@ public class SecurityConfiguration {
         )
         .authorizeHttpRequests(
             authorize -> authorize
-                .requestMatchers(HttpMethod.POST, "/users").permitAll()
+                .requestMatchers(HttpMethod.POST, "/persons").permitAll()
                 .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
                 .anyRequest().authenticated()
         )
