@@ -17,4 +17,8 @@ public enum Role {
   public String getName() {
     return name;
   }
+
+  public String getAuthority() {
+    return this.getName();
+  }
 }

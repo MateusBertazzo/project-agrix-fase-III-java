@@ -2,7 +2,6 @@ package com.betrybe.agrix.ebytr.staff.security;
 
 import com.betrybe.agrix.ebytr.staff.service.PersonService;
 import com.betrybe.agrix.ebytr.staff.service.TokenService;
-
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -15,6 +14,9 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+/**
+ * Security Filter.
+ */
 @Component
 public class SecurityFilter extends OncePerRequestFilter {
   private final TokenService tokenService;
@@ -26,36 +28,31 @@ public class SecurityFilter extends OncePerRequestFilter {
   }
 
   @Override
-  protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
+  protected void doFilterInternal(HttpServletRequest request,
+      HttpServletResponse response,
       FilterChain filterChain) throws ServletException, IOException {
-    Optional<String> token = extractToken(request);
+    String token = extractToken(request);
 
-    if (token.isPresent()) {
-      String subject = tokenService.validateToken(token.get());
-      UserDetails userDetails = personService.getPersonByUsername(subject);
+    if (token != null) {
+      String subject = tokenService.validateToken(token);
+      UserDetails userDetails = personService.loadUserByUsername(subject);
 
       UsernamePasswordAuthenticationToken authentication =
           new UsernamePasswordAuthenticationToken(
-              userDetails,
-              null,
-              userDetails.getAuthorities()
-          );
-
-      SecurityContextHolder.getContext().setAuthentication(
-          authentication
-      );
+          userDetails, null, userDetails.getAuthorities());
+      SecurityContextHolder.getContext().setAuthentication(authentication);
     }
 
     filterChain.doFilter(request, response);
   }
 
-  private Optional<String> extractToken(HttpServletRequest request) {
+  private String extractToken(HttpServletRequest request) {
     String authHeader = request.getHeader("Authorization");
 
-    if (authHeader != null) {
-      authHeader = authHeader.replace("Bearer ", "");
+    if (authHeader == null) {
+      return null;
     }
 
-    return Optional.ofNullable(authHeader);
+    return authHeader.replace("Bearer ", "");
   }
 }

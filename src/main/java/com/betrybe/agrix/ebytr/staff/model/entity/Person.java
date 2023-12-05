@@ -12,7 +12,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 /**
@@ -21,7 +20,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 
 @Entity
-public class Person {
+public class Person implements UserDetails, GrantedAuthority {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -33,6 +32,16 @@ public class Person {
   private String password;
 
   private Role role;
+
+  /**
+   * Constructor Person.
+   */
+  public Person(String username, String password, Role role, Long id) {
+    this.username = username;
+    this.password = password;
+    this.role = role;
+    this.id = id;
+  }
 
   public Person() {
   }
@@ -81,6 +90,33 @@ public class Person {
     return Objects.equals(id, person.id) && Objects.equals(username,
         person.username) && Objects.equals(password, person.password)
         && Objects.equals(role, person.role);
+  }
+
+  @JsonIgnore
+  @Override
+  public Collection<Person> getAuthorities() {
+    return List.of(this);
+  }
+
+  @Override
+  public String getAuthority() {
+    return this.getRole().getAuthority();
+  }
+
+  public boolean isAccountNonExpired() {
+    return true;
+  }
+
+  public boolean isAccountNonLocked() {
+    return true;
+  }
+
+  public boolean isCredentialsNonExpired() {
+    return true;
+  }
+
+  public boolean isEnabled() {
+    return true;
   }
 }
 

@@ -5,6 +5,9 @@ import com.betrybe.agrix.ebytr.staff.model.entity.Person;
 import com.betrybe.agrix.ebytr.staff.model.repository.PersonRepository;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 /**
@@ -51,6 +54,27 @@ public class PersonService {
    * Creates a new person.
    */
   public Person create(Person person) {
-    return personRepository.save(person);
+
+    if (personRepository.findByUsername(person.getUsername()).isPresent()) {
+      throw new IllegalArgumentException("Nome de usuário já existe!");
+    }
+
+    String hashedPassword = new BCryptPasswordEncoder().encode(person.getPassword());
+    person.setPassword(hashedPassword);
+
+    return personRepository.save(person);    
   }
+
+  /**
+   * LoadByUsername.
+   */
+  public UserDetails loadUserByUsername(String username) {
+    Optional<Person> person = personRepository.findByUsername(username);
+
+    if (person.isEmpty()) {
+      throw new PersonNotFoundException();
+    }
+
+    return person.get();
+  }  
 }
